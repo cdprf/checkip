@@ -38,3 +38,10 @@ You can also use environment variables with the same names.
 
 If you want to add a new way to check an IP address, just provide a function
 of type [Check](https://pkg.go.dev/github.com/jreisinger/checkip/check#Check).
+
+To run checkip in a container:
+
+```
+docker build -t checkip .
+docker run checkip -- 1.1.1.1
+```
