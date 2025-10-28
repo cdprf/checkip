@@ -136,9 +136,9 @@ go install github.com/jreisinger/checkip@latest
 
 or download a [release](https://github.com/jreisinger/checkip/releases) binary (from under "Assets") for your system and architecture.
 
-## Configuration
+## Configuration and cache
 
-For some checks to start working you need to register and get an API (LICENSE) key. See the service web site for how to do that. An absent key is not reported as an error, the check is simply not executed and `missingCredentials` JSON field is set.
+For some checks to start working you need to register on the related web site (like https://www.abuseipdb.com/) and get an API (or LICENSE) key. An absent key is not reported as an error, the check is simply not executed and `missingCredentials` JSON field is set to the name of the API key (like `ABUSEIPDB_API_KEY`).
 
 Store the keys in `$HOME/.checkip.yaml` file:
 
