@@ -9,118 +9,53 @@ Sometimes I come across an IP address, for example when reviewing logs. And I'd 
 ## Quick start
 
 ```
-go install github.com/jreisinger/checkip@latest
-checkip 1.1.1.1
-```
-
-## Usage examples
-
-Check an IP address:
-
-```
-❯ checkip 91.228.166.47
+$ go install github.com/jreisinger/checkip@latest
+$ checkip 91.228.166.47
 --- 91.228.166.47 ---
 db-ip.com       Petržalka, Slovakia
 dns name        skh1-webredir01-v.eset.com
 iptoasn.com     ESET-AS
 is on AWS       false
 isc.sans.edu    attacks: 0, abuse contact: domains@eset.sk
-ping            100% packet loss (5/0), avg round-trip 0 ms
+ping            0% packet loss (5/5), avg round-trip 4 ms
 tls             TLS 1.3, exp. 2024/01/02!!, www.eset.com, eset.com
-malicious prob. 8% (1/12) ✅
+virustotal.com  network: 91.228.164.0/22, SAN: www.eset.com, eset.com
+malicious prob. 17% (2/12) 🤏
+```
+
+## More usage examples
+
+Use detailed JSON output to filter out those checks that consider the IP address to be malicious:
+
+```
+checkip -j 91.228.166.47 | jq '.checks[] | select(.ipAddrIsMalicious == true)'
 ```
 
 Check multiple IP addresses coming from STDIN:
 
 ```
-❯ dig +short eset.sk | checkip
---- 91.228.167.128 ---
-db-ip.com       Petržalka, Slovakia
-dns name        h3-webredir02-v.eset.com
-iptoasn.com     ESET-AS
-is on AWS       false
-isc.sans.edu    attacks: 0, abuse contact: domains@eset.sk
-ping            100% packet loss (5/0), avg round-trip 0 ms
-tls             TLS 1.3, exp. 2024/01/02!!, www.eset.com, eset.com
-malicious prob. 9% (1/11) ✅
---- 91.228.166.47 ---
-db-ip.com       Petržalka, Slovakia
-dns name        skh1-webredir01-v.eset.com
-iptoasn.com     ESET-AS
-is on AWS       false
-isc.sans.edu    attacks: 0, abuse contact: domains@eset.sk
-ping            100% packet loss (5/0), avg round-trip 0 ms
-tls             TLS 1.3, exp. 2024/01/02!!, www.eset.com, eset.com
-malicious prob. 8% (1/12) ✅
-```
-
-Use detailed JSON output to filter out those checks that consider the IP address to be malicious:
-
-```
-❯ checkip -j 91.228.166.47 | jq '.checks[] | select(.ipAddrIsMalicious == true)'
-{
-  "description": "tls",
-  "type": "InfoAndIsMalicious",
-  "ipAddrIsMalicious": true,
-  "ipAddrInfo": {
-    "SAN": [
-      "www.eset.com",
-      "eset.com"
-    ],
-    "Version": 772,
-    "Expiry": "2024-01-02T23:59:59Z"
-  }
-}
+dig +short eset.sk | checkip
 ```
 
 Continuously generate [random IP addresses](https://github.com/jreisinger/checkip/blob/master/randip) and check them (hit Ctrl-C to stop):
 
 ```
-❯ while true; do ./randip; sleep 2; done | checkip 2> /dev/null
---- 155.186.85.125 ---
-db-ip.com       Ashburn, United States
-dns name        syn-155-186-085-125.res.spectrum.com
-iptoasn.com     CHARTER-20115
-is on AWS       false
-isc.sans.edu    attacks: 0, abuse contact: abuse@charter.net
-ping            100% packet loss (5/0), avg round-trip 0 ms
-malicious prob. 0% (0/10) ✅
---- 115.159.53.216 ---
-db-ip.com       Shenzhen (Futian Qu), China
-iptoasn.com     TENCENT-NET-AP Shenzhen Tencent Computer Systems Company Limited
-is on AWS       false
-isc.sans.edu    attacks: 0, abuse contact: ipas@cnnic.cn
-ping            100% packet loss (5/0), avg round-trip 0 ms
-malicious prob. 0% (0/10) ✅
+while true; do ./randip; sleep 2; done | checkip 2> /dev/null
 ```
 
 Generate 100 random IP addresses and select Russian or Chinese:
 
 ```
-❯ ./randip 100 | checkip -p 20 -j 2> /dev/null | \
+./randip 100 | checkip -p 20 -j 2> /dev/null | \
 jq -r '.ipAddr as $ip | .checks[] | select (.description == "db-ip.com" and (.ipAddrInfo.iso_code == "RU" or .ipAddrInfo.iso_code == "CN")) | $ip'
-218.19.226.129
-119.32.13.38
-139.210.45.205
 ```
 
 Find out who is trying to SSH into your Linux system:
 
 ```
-❯ sudo journalctl --unit ssh --since "1 hour ago" | \
+sudo journalctl --unit ssh --since "1 hour ago" | \
 grep 'Bye Bye' | perl -wlne '/from ([\d\.]+)/ && print $1' | sort | uniq | \
 checkip 2> /dev/null
---- 167.172.105.64 ---
-db-ip.com       Frankfurt am Main, Germany
-iptoasn.com     DIGITALOCEAN-ASN
-ping            0% packet loss (5/5), avg round-trip 21 ms
-tls             TLS 1.3, exp. 2024/12/27, portal.itruck.com.sa, www.portal.itruck.com.sa
-malicious prob. 43% (3/7) 🤏
---- 180.168.95.234 ---
-db-ip.com       Shanghai, China
-iptoasn.com     CHINANET-SH-AP China Telecom Group
-ping            0% packet loss (5/5), avg round-trip 213 ms
-malicious prob. 50% (3/6) 🚫
 ```
 
 ## Installation
