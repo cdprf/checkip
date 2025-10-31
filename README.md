@@ -4,20 +4,30 @@
 
 # checkip
 
-Sometimes I come across an IP address, for example when reviewing logs. And I'd like to find out more about this numerical label. Checkip is CLI tool and Go [library](https://pkg.go.dev/github.com/jreisinger/checkip/check) that provides information on and security posture of IP addresses. Most checks are passive. Active checks (like ping and tls) are not aggressive.
+Sometimes I come across an IP address, reviewing logs for example, and I want to know more about this numerical label. Checkip is CLI tool and Go [library](https://pkg.go.dev/github.com/jreisinger/checkip/check) that provides (security) information on IP addresses. It runs various checks to get the information. Most checks are passive, i.e. not interacting directly with the IP address. Active checks, like ping and tls, are not aggressive.
 
 ## Quick start
 
 ```
 $ go install github.com/jreisinger/checkip@latest
-$ checkip 91.228.166.47
+$ checkip 1.1.1.1 91.228.166.47
+--- 1.1.1.1 ---
+db-ip.com       Sydney, Australia
+dns name        one.one.one.one
+iptoasn.com     CLOUDFLARENET
+is on AWS       false
+isc.sans.edu    attacks: 0, abuse contact: abuse@cloudflare.com
+ping            0% packet loss (5/5), avg round-trip 4 ms
+tls             TLS 1.3, exp. 2026/01/21, cloudflare-dns.com, *.cloudflare-dns.com, one.one.one.one
+virustotal.com  network: 1.1.1.0/24, SAN: cloudflare-dns.com, *.cloudflare-dns.com, one.one.one.one, 1.0.0.1, 1.1.1.1, 162.159.36.1, 162.159.46.1, 2606:4700:4700::1001, 2606:4700:4700::1111, 2606:4700:4700::64, 2606:4700:4700::6400
+malicious prob. 0% (0/12) ✅
 --- 91.228.166.47 ---
 db-ip.com       Petržalka, Slovakia
 dns name        skh1-webredir01-v.eset.com
 iptoasn.com     ESET-AS
 is on AWS       false
 isc.sans.edu    attacks: 0, abuse contact: domains@eset.sk
-ping            0% packet loss (5/5), avg round-trip 4 ms
+ping            0% packet loss (5/5), avg round-trip 5 ms
 tls             TLS 1.3, exp. 2024/01/02!!, www.eset.com, eset.com
 virustotal.com  network: 91.228.164.0/22, SAN: www.eset.com, eset.com
 malicious prob. 17% (2/12) 🤏
@@ -73,7 +83,7 @@ or download a [release](https://github.com/jreisinger/checkip/releases) binary (
 
 ## Configuration and cache
 
-For some checks to start working you need to register on the related web site (like https://www.abuseipdb.com/) and get an API (or LICENSE) key. An absent key is not reported as an error, the check is simply not executed and `missingCredentials` JSON field is set to the name of the API key (like `ABUSEIPDB_API_KEY`).
+For some checks to start working you need to sign up on a web site (like https://www.abuseipdb.com) and get an API (or LICENSE) key. Checkip doesn't report an absent API key as an error; the check is simply not executed and `missingCredentials` JSON field is set to the name of the API key (like `ABUSEIPDB_API_KEY`).
 
 Store the keys in `$HOME/.checkip.yaml` file:
 
@@ -87,7 +97,7 @@ VIRUSTOTAL_API_KEY: aaaaaaaabbbbbbbbccccccccddddddddeeeeeeeeffffffff111111112222
 
 You can also use environment variables with the same names.
 
-Data used by some checks are downloaded (cached) to `$HOME/.checkip/` folder. They are periodically re-downloaded so they are fresh.
+Data used by some checks is downloaded (cached) to `$HOME/.checkip/` folder. Is gets periodically re-downloaded so it is fresh.
 
 ## Development
 
